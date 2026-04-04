@@ -1,0 +1,1719 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_SQLSERVER",
+      "label": "SQL Server",
+      "description": "Data source Microsoft SQL Server (mssql) - configure o datasource conforme seu ambiente",
+      "type": "datasource",
+      "pluginId": "mssql",
+      "pluginName": "Microsoft SQL Server"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.2.1"
+    },
+    {
+      "type": "datasource",
+      "id": "mssql",
+      "name": "Microsoft SQL Server",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "barchart",
+      "name": "Bar chart",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "piechart",
+      "name": "Pie chart",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Dashboard completo de monitoramento de SQL Server - Queries lentas, CPU, Memoria, Wait Stats, I/O, Conexoes, Database Space e Index Health",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "ROW 1: Visao Geral do Servidor",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          },
+          "unit": "h"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Uptime do Servidor",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT DATEDIFF(HOUR, sqlserver_start_time, GETDATE()) AS uptime_hours FROM sys.dm_os_sys_info",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 5, "x": 4, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Versao SQL Server",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT SERVERPROPERTY('ProductVersion') AS version",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 100 },
+              { "color": "red", "value": 500 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 5, "x": 9, "y": 1 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Conexoes Ativas",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS active_connections FROM sys.dm_exec_connections",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 50 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 5, "x": 14, "y": 1 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Requests em Execucao",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS running_requests FROM sys.dm_exec_requests WHERE status = 'running'",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 5, "x": 19, "y": 1 },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Sessoes Bloqueadas",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS blocked_sessions FROM sys.dm_exec_requests WHERE blocking_session_id <> 0",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "id": 200,
+      "title": "ROW 2: Top 10 Queries Mais Lentas",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10000 },
+              { "color": "red", "value": 35000 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "avg_elapsed_time_ms" },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "max",
+                "value": 60000
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "execution_count" },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "total_elapsed_time_ms" },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "avg_cpu_time_ms" },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "avg_logical_reads" },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "query_text" },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 500
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 6 },
+      "id": 6,
+      "options": {
+        "showHeader": true,
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "avg_elapsed_time_ms"
+          }
+        ]
+      },
+      "title": "Top 10 Queries Mais Lentas (por tempo medio de execucao)",
+      "description": "Queries ordenadas por tempo medio de execucao (total_elapsed_time / execution_count). total_elapsed_time e em microsegundos, dividido por 1000 = milissegundos. Threshold: verde < 10s, amarelo 10-35s, vermelho > 35s.",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT TOP 10\n    qs.execution_count,\n    (qs.total_elapsed_time / qs.execution_count) / 1000 AS avg_elapsed_time_ms,\n    qs.total_elapsed_time / 1000 AS total_elapsed_time_ms,\n    (qs.total_worker_time / qs.execution_count) / 1000 AS avg_cpu_time_ms,\n    qs.total_logical_reads / qs.execution_count AS avg_logical_reads,\n    qs.total_logical_writes / qs.execution_count AS avg_logical_writes,\n    qs.last_execution_time,\n    SUBSTRING(st.text, (qs.statement_start_offset/2)+1,\n        ((CASE qs.statement_end_offset WHEN -1 THEN DATALENGTH(st.text) ELSE qs.statement_end_offset END - qs.statement_start_offset)/2) + 1) AS query_text\nFROM sys.dm_exec_query_stats qs\nCROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) st\nWHERE qs.execution_count > 0\nORDER BY (qs.total_elapsed_time / qs.execution_count) DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10000 },
+              { "color": "red", "value": 35000 }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 16, "x": 0, "y": 16 },
+      "id": 7,
+      "options": {
+        "barRadius": 0.1,
+        "barWidth": 0.8,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": 0
+      },
+      "title": "Top 10 Queries - Tempo Medio de Execucao (ms)",
+      "description": "Grafico de barras horizontal mostrando o tempo medio de execucao em milissegundos das 10 queries mais lentas.",
+      "type": "barchart",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT TOP 10\n    LEFT(REPLACE(REPLACE(SUBSTRING(st.text, (qs.statement_start_offset/2)+1,\n        ((CASE qs.statement_end_offset WHEN -1 THEN DATALENGTH(st.text) ELSE qs.statement_end_offset END - qs.statement_start_offset)/2) + 1), CHAR(13), ' '), CHAR(10), ' '), 60) AS query_short,\n    (qs.total_elapsed_time / qs.execution_count) / 1000 AS avg_elapsed_time_ms\nFROM sys.dm_exec_query_stats qs\nCROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) st\nWHERE qs.execution_count > 0\nORDER BY (qs.total_elapsed_time / qs.execution_count) DESC",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {},
+            "renameByName": {
+              "query_short": "Query",
+              "avg_elapsed_time_ms": "Tempo Medio (ms)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10000 },
+              { "color": "red", "value": 35000 }
+            ]
+          },
+          "max": 60000,
+          "min": 0,
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 8, "x": 16, "y": 16 },
+      "id": 8,
+      "options": {
+        "minVizHeight": 200,
+        "minVizWidth": 200,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "title": "Query Mais Lenta (avg ms)",
+      "description": "Gauge da query com maior tempo medio de execucao. Verde < 10s, Amarelo 10-35s, Vermelho > 35s.",
+      "type": "gauge",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT TOP 1\n    (qs.total_elapsed_time / qs.execution_count) / 1000 AS max_avg_elapsed_time_ms\nFROM sys.dm_exec_query_stats qs\nWHERE qs.execution_count > 0\nORDER BY (qs.total_elapsed_time / qs.execution_count) DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 26 },
+      "id": 300,
+      "title": "ROW 3: CPU e Memoria",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "CPU %",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 25,
+            "gradientMode": "opacity",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": {
+              "mode": "line+area"
+            }
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": null },
+              { "color": "red", "value": 85 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "sql_cpu_percent" },
+            "properties": [
+              { "id": "displayName", "value": "SQL Server CPU %" },
+              { "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "other_cpu_percent" },
+            "properties": [
+              { "id": "displayName", "value": "Outros Processos CPU %" },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "system_idle_percent" },
+            "properties": [
+              { "id": "displayName", "value": "Sistema Idle %" },
+              { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 27 },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "CPU Usage ao Longo do Tempo",
+      "description": "Historico de CPU do SQL Server vs outros processos (ultimos ~60 registros do ring buffer).",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT TOP 60\n    DATEADD(ms, -1 * ((SELECT cpu_ticks / (cpu_ticks / ms_ticks) FROM sys.dm_os_sys_info) - [timestamp]), GETDATE()) AS time,\n    SQLProcessUtilization AS sql_cpu_percent,\n    SystemIdle AS system_idle_percent,\n    100 - SystemIdle - SQLProcessUtilization AS other_cpu_percent\nFROM (\n    SELECT\n        record.value('(./Record/@id)[1]', 'int') AS record_id,\n        record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') AS SystemIdle,\n        record.value('(./Record/SchedulerMonitorEvent/SystemHealth/ProcessUtilization)[1]', 'int') AS SQLProcessUtilization,\n        [timestamp]\n    FROM (\n        SELECT [timestamp], CONVERT(xml, record) AS record\n        FROM sys.dm_os_ring_buffers\n        WHERE ring_buffer_type = N'RING_BUFFER_SCHEDULER_MONITOR'\n        AND record LIKE N'%<SystemHealth>%'\n    ) AS x\n) AS y\nORDER BY record_id DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null }
+            ]
+          },
+          "unit": "decmbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 27 },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Memoria Total do Servidor",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT total_physical_memory_kb / 1024 AS total_memory_mb FROM sys.dm_os_sys_memory",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 80 },
+              { "color": "red", "value": 95 }
+            ]
+          },
+          "unit": "decmbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 27 },
+      "id": 11,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Memoria Usada pelo SQL Server",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT physical_memory_in_use_kb / 1024 AS sql_memory_mb FROM sys.dm_os_process_memory",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 90 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "max": 100,
+          "min": 0,
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 31 },
+      "id": 12,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "title": "Buffer Cache Hit Ratio",
+      "description": "Percentual de paginas encontradas no buffer cache sem necessidade de leitura em disco. Deve ser > 95% em ambientes OLTP.",
+      "type": "gauge",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    CAST((a.cntr_value * 1.0 / NULLIF(b.cntr_value, 0)) * 100 AS DECIMAL(5,2)) AS buffer_cache_hit_ratio\nFROM sys.dm_os_performance_counters a\nJOIN sys.dm_os_performance_counters b ON a.object_name = b.object_name\nWHERE a.counter_name = 'Buffer cache hit ratio'\nAND b.counter_name = 'Buffer cache hit ratio base'\nAND a.object_name LIKE '%Buffer Manager%'",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 200 },
+              { "color": "green", "value": 300 }
+            ]
+          },
+          "min": 0,
+          "max": 1000,
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 31 },
+      "id": 13,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "title": "Page Life Expectancy",
+      "description": "Tempo em segundos que uma pagina permanece no buffer pool sem ser referenciada. Bom: > 300s. Valores baixos indicam pressao de memoria.",
+      "type": "gauge",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT cntr_value AS page_life_expectancy_sec\nFROM sys.dm_os_performance_counters\nWHERE counter_name = 'Page life expectancy'\nAND object_name LIKE '%Buffer Manager%'",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 35 },
+      "id": 400,
+      "title": "ROW 4: Wait Stats (Onde o SQL Perde Tempo)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 10, "x": 0, "y": 36 },
+      "id": 14,
+      "options": {
+        "displayLabels": ["name", "percent"],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": ["value", "percent"]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "title": "Top 10 Wait Types (Pie Chart)",
+      "description": "Distribuicao dos wait types mais significativos. Exclui waits de sistema (idle, sleep, etc.).",
+      "type": "piechart",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT TOP 10\n    wait_type,\n    wait_time_ms / 1000 AS wait_time_sec\nFROM sys.dm_os_wait_stats\nWHERE wait_type NOT IN (\n    'SLEEP_TASK', 'BROKER_TO_FLUSH', 'SQLTRACE_BUFFER_FLUSH',\n    'CLR_AUTO_EVENT', 'CLR_MANUAL_EVENT', 'LAZYWRITER_SLEEP',\n    'CHECKPOINT_QUEUE', 'WAITFOR', 'BROKER_EVENTHANDLER',\n    'FT_IFTS_SCHEDULER_IDLE_WAIT', 'XE_DISPATCHER_WAIT',\n    'XE_TIMER_EVENT', 'HADR_FILESTREAM_IOMGR_IOCOMPLETION',\n    'DIRTY_PAGE_POLL', 'REQUEST_FOR_DEADLOCK_SEARCH',\n    'LOGMGR_QUEUE', 'ONDEMAND_TASK_QUEUE', 'BROKER_RECEIVE_WAITFOR',\n    'PREEMPTIVE_OS_GETPROCADDRESS', 'PREEMPTIVE_OS_AUTHENTICATIONOPS',\n    'BROKER_TASK_STOP', 'SP_SERVER_DIAGNOSTICS_SLEEP'\n)\nAND waiting_tasks_count > 0\nORDER BY wait_time_ms DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "wait_time_sec" },
+            "properties": [
+              { "id": "unit", "value": "s" },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "signal_wait_sec" },
+            "properties": [
+              { "id": "unit", "value": "s" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "avg_wait_ms" },
+            "properties": [
+              { "id": "unit", "value": "ms" }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 14, "x": 10, "y": 36 },
+      "id": 15,
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "wait_time_sec"
+          }
+        ]
+      },
+      "title": "Detalhes dos Wait Stats",
+      "description": "Tabela detalhada com wait types, tempo total de espera, signal wait e media por task.",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT TOP 15\n    wait_type,\n    wait_time_ms / 1000 AS wait_time_sec,\n    signal_wait_time_ms / 1000 AS signal_wait_sec,\n    (wait_time_ms - signal_wait_time_ms) / 1000 AS resource_wait_sec,\n    waiting_tasks_count,\n    CASE WHEN waiting_tasks_count > 0\n        THEN CAST(wait_time_ms * 1.0 / waiting_tasks_count AS DECIMAL(12,2))\n        ELSE 0\n    END AS avg_wait_ms\nFROM sys.dm_os_wait_stats\nWHERE wait_type NOT IN (\n    'SLEEP_TASK', 'BROKER_TO_FLUSH', 'SQLTRACE_BUFFER_FLUSH',\n    'CLR_AUTO_EVENT', 'CLR_MANUAL_EVENT', 'LAZYWRITER_SLEEP',\n    'CHECKPOINT_QUEUE', 'WAITFOR', 'BROKER_EVENTHANDLER',\n    'FT_IFTS_SCHEDULER_IDLE_WAIT', 'XE_DISPATCHER_WAIT',\n    'XE_TIMER_EVENT', 'HADR_FILESTREAM_IOMGR_IOCOMPLETION',\n    'DIRTY_PAGE_POLL', 'REQUEST_FOR_DEADLOCK_SEARCH',\n    'LOGMGR_QUEUE', 'ONDEMAND_TASK_QUEUE', 'BROKER_RECEIVE_WAITFOR',\n    'PREEMPTIVE_OS_GETPROCADDRESS', 'PREEMPTIVE_OS_AUTHENTICATIONOPS',\n    'BROKER_TASK_STOP', 'SP_SERVER_DIAGNOSTICS_SLEEP'\n)\nAND waiting_tasks_count > 0\nORDER BY wait_time_ms DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 46 },
+      "id": 500,
+      "title": "ROW 5: I/O Performance",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "total_read_mb" },
+            "properties": [
+              { "id": "unit", "value": "decmbytes" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "total_write_mb" },
+            "properties": [
+              { "id": "unit", "value": "decmbytes" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "read_stall_ms" },
+            "properties": [
+              { "id": "unit", "value": "ms" },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "write_stall_ms" },
+            "properties": [
+              { "id": "unit", "value": "ms" },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "avg_read_latency_ms" },
+            "properties": [
+              { "id": "unit", "value": "ms" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 20 },
+                    { "color": "red", "value": 50 }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "avg_write_latency_ms" },
+            "properties": [
+              { "id": "unit", "value": "ms" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 20 },
+                    { "color": "red", "value": 50 }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 47 },
+      "id": 16,
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": true
+        },
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "read_stall_ms"
+          }
+        ]
+      },
+      "title": "I/O por Database (Top Databases por Stall)",
+      "description": "Mostra total de leituras, escritas, volumes e latencia (stall) por database. Latencia alta indica problemas de disco.",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    DB_NAME(database_id) AS database_name,\n    SUM(num_of_reads) AS total_reads,\n    SUM(num_of_writes) AS total_writes,\n    SUM(num_of_bytes_read) / 1024 / 1024 AS total_read_mb,\n    SUM(num_of_bytes_written) / 1024 / 1024 AS total_write_mb,\n    SUM(io_stall_read_ms) AS read_stall_ms,\n    SUM(io_stall_write_ms) AS write_stall_ms,\n    CASE WHEN SUM(num_of_reads) > 0\n        THEN CAST(SUM(io_stall_read_ms) * 1.0 / SUM(num_of_reads) AS DECIMAL(10,2))\n        ELSE 0\n    END AS avg_read_latency_ms,\n    CASE WHEN SUM(num_of_writes) > 0\n        THEN CAST(SUM(io_stall_write_ms) * 1.0 / SUM(num_of_writes) AS DECIMAL(10,2))\n        ELSE 0\n    END AS avg_write_latency_ms\nFROM sys.dm_io_virtual_file_stats(NULL, NULL)\nWHERE DB_NAME(database_id) IS NOT NULL\nGROUP BY database_id\nORDER BY (SUM(io_stall_read_ms) + SUM(io_stall_write_ms)) DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 20 },
+              { "color": "red", "value": 50 }
+            ]
+          },
+          "max": 100,
+          "min": 0,
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 12, "x": 0, "y": 55 },
+      "id": 17,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "title": "Avg Disk Read Latency (Global)",
+      "description": "Latencia media de leitura em disco (todas as databases). Bom < 20ms, Alerta > 50ms.",
+      "type": "gauge",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    CASE WHEN SUM(num_of_reads) > 0\n        THEN CAST(SUM(io_stall_read_ms) * 1.0 / SUM(num_of_reads) AS DECIMAL(10,2))\n        ELSE 0\n    END AS avg_read_latency_ms\nFROM sys.dm_io_virtual_file_stats(NULL, NULL)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 20 },
+              { "color": "red", "value": 50 }
+            ]
+          },
+          "max": 100,
+          "min": 0,
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 12, "x": 12, "y": 55 },
+      "id": 18,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "title": "Avg Disk Write Latency (Global)",
+      "description": "Latencia media de escrita em disco (todas as databases). Bom < 20ms, Alerta > 50ms.",
+      "type": "gauge",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    CASE WHEN SUM(num_of_writes) > 0\n        THEN CAST(SUM(io_stall_write_ms) * 1.0 / SUM(num_of_writes) AS DECIMAL(10,2))\n        ELSE 0\n    END AS avg_write_latency_ms\nFROM sys.dm_io_virtual_file_stats(NULL, NULL)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 60 },
+      "id": 600,
+      "title": "ROW 6: Conexoes e Sessoes",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "cpu_time" },
+            "properties": [
+              { "id": "unit", "value": "ms" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "memory_kb" },
+            "properties": [
+              { "id": "unit", "value": "deckbytes" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "status" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "options": { "running": { "color": "green", "index": 0, "text": "RUNNING" } }, "type": "value" },
+                  { "options": { "sleeping": { "color": "blue", "index": 1, "text": "SLEEPING" } }, "type": "value" },
+                  { "options": { "suspended": { "color": "orange", "index": 2, "text": "SUSPENDED" } }, "type": "value" }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "blocking_session_id" },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "red", "value": 1 }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 61 },
+      "id": 19,
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": true,
+          "fields": "",
+          "reducer": ["count"],
+          "show": true
+        },
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "cpu_time"
+          }
+        ]
+      },
+      "title": "Sessoes Ativas (User Processes)",
+      "description": "Lista de sessoes de usuario com CPU, memoria, leituras, escritas e informacoes de bloqueio.",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    s.session_id,\n    s.login_name,\n    s.host_name,\n    DB_NAME(s.database_id) AS database_name,\n    s.status,\n    s.cpu_time,\n    s.memory_usage * 8 AS memory_kb,\n    s.reads,\n    s.writes,\n    s.last_request_start_time,\n    r.command,\n    r.wait_type,\n    r.wait_time AS wait_time_ms,\n    ISNULL(r.blocking_session_id, 0) AS blocking_session_id,\n    CASE WHEN r.sql_handle IS NOT NULL\n        THEN (SELECT TOP 1 LEFT(text, 100) FROM sys.dm_exec_sql_text(r.sql_handle))\n        ELSE NULL\n    END AS current_query\nFROM sys.dm_exec_sessions s\nLEFT JOIN sys.dm_exec_requests r ON s.session_id = r.session_id\nWHERE s.is_user_process = 1\nORDER BY s.cpu_time DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 71 },
+      "id": 20,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Sessoes Bloqueadas (AGORA)",
+      "description": "Numero de sessoes que estao sendo bloqueadas por outras sessoes neste momento. Qualquer valor > 0 e preocupante.",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS blocked_sessions\nFROM sys.dm_exec_requests\nWHERE blocking_session_id <> 0",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "wait_time_sec" },
+            "properties": [
+              { "id": "unit", "value": "s" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 5 },
+                    { "color": "red", "value": 30 }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 18, "x": 6, "y": 71 },
+      "id": 21,
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        }
+      },
+      "title": "Blocking Chains (Detalhes)",
+      "description": "Detalhes de sessoes bloqueadas e suas blockers. Mostra quem esta bloqueando quem, ha quanto tempo e qual query esta envolvida.",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    r.session_id AS blocked_session_id,\n    r.blocking_session_id AS blocker_session_id,\n    DB_NAME(r.database_id) AS database_name,\n    r.wait_type,\n    r.wait_time / 1000.0 AS wait_time_sec,\n    r.command,\n    s_blocked.login_name AS blocked_login,\n    s_blocked.host_name AS blocked_host,\n    s_blocker.login_name AS blocker_login,\n    s_blocker.host_name AS blocker_host,\n    LEFT((SELECT TOP 1 text FROM sys.dm_exec_sql_text(r.sql_handle)), 120) AS blocked_query,\n    LEFT(\n        (SELECT TOP 1 text FROM sys.dm_exec_sql_text(\n            (SELECT TOP 1 r2.sql_handle FROM sys.dm_exec_requests r2 WHERE r2.session_id = r.blocking_session_id)\n        )), 120\n    ) AS blocker_query\nFROM sys.dm_exec_requests r\nJOIN sys.dm_exec_sessions s_blocked ON r.session_id = s_blocked.session_id\nLEFT JOIN sys.dm_exec_sessions s_blocker ON r.blocking_session_id = s_blocker.session_id\nWHERE r.blocking_session_id <> 0\nORDER BY r.wait_time DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 79 },
+      "id": 700,
+      "title": "ROW 7: Database Space",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "size_mb" },
+            "properties": [
+              { "id": "unit", "value": "decmbytes" },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "growth_mb" },
+            "properties": [
+              { "id": "unit", "value": "decmbytes" }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 14, "x": 0, "y": 80 },
+      "id": 22,
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "size_mb",
+          "reducer": ["sum"],
+          "show": true
+        },
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "size_mb"
+          }
+        ]
+      },
+      "title": "Tamanho dos Arquivos de Database",
+      "description": "Tamanho atual, limite maximo e crescimento configurado de cada arquivo de cada database.",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    DB_NAME(database_id) AS database_name,\n    type_desc,\n    name AS file_name,\n    physical_name,\n    size * 8 / 1024 AS size_mb,\n    CASE max_size\n        WHEN -1 THEN 'Unlimited'\n        WHEN 0 THEN 'No Growth'\n        ELSE CAST(max_size * 8 / 1024 AS VARCHAR) + ' MB'\n    END AS max_size,\n    CASE is_percent_growth\n        WHEN 1 THEN CAST(growth AS VARCHAR) + ' %'\n        ELSE CAST(growth * 8 / 1024 AS VARCHAR) + ' MB'\n    END AS growth_config\nFROM sys.master_files\nORDER BY size DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "unit": "decmbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 10, "x": 14, "y": 80 },
+      "id": 23,
+      "options": {
+        "barRadius": 0.1,
+        "barWidth": 0.8,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "normal",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": 0
+      },
+      "title": "Top Databases por Tamanho Total",
+      "description": "Grafico de barras horizontal mostrando o tamanho total de cada database (DATA + LOG).",
+      "type": "barchart",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    DB_NAME(database_id) AS database_name,\n    SUM(CASE WHEN type_desc = 'ROWS' THEN size * 8 / 1024 ELSE 0 END) AS data_mb,\n    SUM(CASE WHEN type_desc = 'LOG' THEN size * 8 / 1024 ELSE 0 END) AS log_mb\nFROM sys.master_files\nGROUP BY database_id\nORDER BY SUM(size) DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 90 },
+      "id": 800,
+      "title": "ROW 8: Index Health",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "improvement_measure" },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "user_seeks" },
+            "properties": [
+              { "id": "custom.width", "value": 100 }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 91 },
+      "id": 24,
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "improvement_measure"
+          }
+        ]
+      },
+      "title": "Missing Indexes - Maior Impacto de Melhoria",
+      "description": "Indices que o SQL Server sugere criar. Ordenado por improvement_measure (combinacao de custo, impacto e frequencia de seeks).",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT TOP 15\n    DB_NAME(d.database_id) AS database_name,\n    OBJECT_NAME(d.object_id, d.database_id) AS table_name,\n    d.equality_columns,\n    d.inequality_columns,\n    d.included_columns,\n    gs.user_seeks,\n    gs.user_scans,\n    CAST(gs.avg_total_user_cost AS DECIMAL(10,2)) AS avg_total_user_cost,\n    CAST(gs.avg_user_impact AS DECIMAL(5,2)) AS avg_user_impact_pct,\n    CAST(gs.avg_total_user_cost * gs.avg_user_impact * (gs.user_seeks + gs.user_scans) AS DECIMAL(18,2)) AS improvement_measure\nFROM sys.dm_db_missing_index_details d\nJOIN sys.dm_db_missing_index_groups g ON d.index_handle = g.index_handle\nJOIN sys.dm_db_missing_index_group_stats gs ON g.index_group_handle = gs.group_handle\nWHERE DB_NAME(d.database_id) IS NOT NULL\nORDER BY gs.avg_total_user_cost * gs.avg_user_impact * (gs.user_seeks + gs.user_scans) DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "avg_frag_pct" },
+            "properties": [
+              { "id": "unit", "value": "percent" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 10 },
+                    { "color": "orange", "value": 30 },
+                    { "color": "red", "value": 50 }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "page_count" },
+            "properties": [
+              { "id": "custom.width", "value": 100 }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 101 },
+      "id": 25,
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": true,
+          "fields": "",
+          "reducer": ["count"],
+          "show": true
+        },
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "avg_frag_pct"
+          }
+        ]
+      },
+      "title": "Indices Mais Fragmentados (> 30%)",
+      "description": "Indices com fragmentacao alta. Fragmentacao > 30% requer REBUILD, entre 10-30% requer REORGANIZE. Apenas indices com mais de 1000 paginas sao relevantes.",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": { "type": "mssql", "uid": "${DS_SQLSERVER}" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    DB_NAME() AS database_name,\n    OBJECT_NAME(ips.object_id) AS table_name,\n    i.name AS index_name,\n    i.type_desc AS index_type,\n    CAST(ips.avg_fragmentation_in_percent AS DECIMAL(5,2)) AS avg_frag_pct,\n    ips.page_count,\n    ips.record_count,\n    CASE\n        WHEN ips.avg_fragmentation_in_percent > 30 THEN 'REBUILD'\n        WHEN ips.avg_fragmentation_in_percent > 10 THEN 'REORGANIZE'\n        ELSE 'OK'\n    END AS recommended_action\nFROM sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, 'LIMITED') ips\nJOIN sys.indexes i ON ips.object_id = i.object_id AND ips.index_id = i.index_id\nWHERE ips.avg_fragmentation_in_percent > 10\nAND ips.page_count > 1000\nAND i.name IS NOT NULL\nORDER BY ips.avg_fragmentation_in_percent DESC",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["sql-server", "database", "performance", "dba", "prd"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "SQL Server Performance Monitor - PRD",
+  "uid": "sqlserver-perf",
+  "version": 1
+}
