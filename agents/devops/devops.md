@@ -2863,6 +2863,38 @@ Todo pipeline, toda configuracao, toda infraestrutura DEVE considerar e seguir:
 - **Contexto:** ArgoCD monitora o repositorio Git e faz auto-sync quando detecta mudancas nos manifests/values. Atualizar o tag no values.yaml e dar push e suficiente para triggrar o deploy
 - **Contexto adicional:** Pipeline CI/CD com ArgoCD auto-sync
 
+## Padroes de Deploy para Observabilidade
+
+### Auto-Instrumentacao via OTel Operator
+- Instrumentation CRD DEVE apontar para imagem customizada com `@prisma/instrumentation`
+- NAO usar auto-instrumentacao do Operator se o app ja tem `tracing.cjs` proprio (conflito de SDK)
+- Se o app tem tracing proprio, adicionar env vars OTel no Helm values em vez de annotation
+
+### Profiler eBPF
+- DaemonSet do Alloy profiler NUNCA deve rodar no control plane
+- Tolerations devem listar nodes especificos, NAO usar `operator: Exists` generico
+- ConfigMap do Alloy deve usar `discovery.relabel` para labels de pod (namespace, pod, service_name)
+- Imagem: `grafana/alloy` (Pyroscope ebpf mode esta deprecated)
+
+### ENV Vars OTel para Apps com tracing proprio
+Quando o app tem `tracing.cjs`, adicionar no Helm values:
+```yaml
+env:
+  - name: NODE_OPTIONS
+    value: "--require ./tracing.cjs"
+  - name: OTEL_SERVICE_NAME
+    value: "<nome-do-servico>"
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "http://otel-gateway.observability.svc.cluster.local:4318"
+  - name: OTEL_EXPORTER_OTLP_PROTOCOL
+    value: "http/protobuf"
+```
+
+### Helm Charts
+- Sempre incluir `OTEL_SERVICE_NAME` e `OTEL_EXPORTER_OTLP_ENDPOINT` nos values
+- Profiler como opt-in (enabled: false por default)
+- Imagens de auto-instrumentacao em registry publico (ghcr.io)
+
 ## Regra de Isolamento Multi-Tenant
 
 > **REGRA CRITICA**: Todo codigo, query, configuracao ou endpoint gerado DEVE garantir isolamento multi-tenant.

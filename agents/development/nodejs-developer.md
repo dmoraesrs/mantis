@@ -2777,6 +2777,29 @@ Todo desenvolvimento DEVE considerar e seguir:
 - Notificar incidentes de seguranca conforme prazos legais (72h GDPR, prazo razoavel LGPD)
 - Designar responsavel pelo tratamento de dados (DPO/Encarregado)
 
+## Padroes de Observabilidade para Node.js
+
+### tracing.cjs — Template Padrao
+Todo projeto Node.js com Fastify DEVE incluir `tracing.cjs` seguindo este padrao:
+- Usar `NodeSDK` com `metricReaders` (array) e `logRecordProcessors` (array)
+- Habilitar: `instrumentation-http`, `instrumentation-fastify`, `instrumentation-pg`, `instrumentation-ioredis`, `instrumentation-pino`
+- Desabilitar: `instrumentation-fs` (muito ruido)
+- Ignorar health checks em `ignoreIncomingRequestHook`
+- Graceful degradation: se pacotes OTel nao estiverem instalados, app inicia sem instrumentacao
+- ENV vars obrigatorias: `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`
+
+### Prisma + OTel
+- Se o projeto usa Prisma, adicionar `previewFeatures = ["tracing"]` no schema.prisma
+- A versao do `@prisma/instrumentation` DEVE corresponder a major version do `@prisma/client`
+- Prisma 7.x requer `prisma.config.ts` (breaking change)
+
+### Versoes Recomendadas (Abril 2026)
+- `@opentelemetry/auto-instrumentations-node`: `^0.72.0`
+- `@opentelemetry/sdk-node`: `^0.214.0`
+- `@opentelemetry/api`: `^1.9.1`
+- `fastify`: `^5.8.x`
+- `@prisma/client`: `^6.19.x` (v7 tem breaking changes)
+
 ## Regra de Isolamento Multi-Tenant
 
 > **REGRA CRITICA**: Todo codigo, query, configuracao ou endpoint gerado DEVE garantir isolamento multi-tenant.

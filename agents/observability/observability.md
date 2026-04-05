@@ -494,6 +494,32 @@ error_budget:
 - **SEMPRE:** Adicionar `setuptools<81` no requirements.txt
 - **Contexto:** Python 3.13+ com setuptools>=81 remove `pkg_resources` que o OTel usa
 
+## Padroes Obrigatorios de Instrumentacao
+
+### Queries PromQL para APM
+- **NUNCA** filtrar por `http_route!=""` sem fallback — servicos com tracing proprio podem nao ter `http_route`. Usar `span_kind="SPAN_KIND_SERVER"` como filtro principal e `span_name` como fallback para rotas.
+- **SEMPRE** agrupar por `span_name` alem de `http_route` para cobrir servicos sem instrumentacao de framework.
+- Metricas spanmetrics: `traces_spanmetrics_calls_total`, `traces_spanmetrics_duration_milliseconds_bucket`
+- Metricas servicegraph: `traces_service_graph_request_total`, `traces_service_graph_request_failed_total`
+
+### Auto-Instrumentacao Node.js
+- Imagem customizada DEVE incluir `@prisma/instrumentation` (Prisma usa engine Rust, nao hookeia `pg`)
+- Versao do `@prisma/instrumentation` DEVE ser compativel com `@prisma/client` do app (mesma major version)
+- `@opentelemetry/auto-instrumentations-node` DEVE estar na versao mais recente para suporte a Fastify v5+
+- `tracing.cjs` DEVE usar `metricReaders` (array) e `logRecordProcessors` (array), NAO as opcoes deprecated
+
+### Profiler eBPF (Alloy)
+- **NUNCA** rodar profiler eBPF no control plane K8s — consome CPU demais e derruba o API server
+- Usar tolerations especificas em vez de `operator: Exists` generico
+- ConfigMap do Alloy: usar `discovery.relabel` para adicionar `service_name` como label
+- Pyroscope query format: `process_cpu:cpu:nanoseconds:cpu:nanoseconds{service_name="X"}`
+
+### Compatibilidade de Versoes
+- Prisma Client 5.x → `@prisma/instrumentation@5.x`
+- Prisma Client 6.x → `@prisma/instrumentation@6.x`
+- Prisma Client 7.x → `@prisma/instrumentation@7.x` (requer `prisma.config.ts`)
+- OTel SDK: manter TODAS as dependencias `@opentelemetry/*` na mesma minor version
+
 ## Regra de Isolamento Multi-Tenant
 
 > **REGRA CRITICA**: Todo codigo, query, configuracao ou endpoint gerado DEVE garantir isolamento multi-tenant.
