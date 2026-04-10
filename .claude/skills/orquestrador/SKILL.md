@@ -57,7 +57,11 @@ Consulte a base de agentes disponivel em `agents/` neste repositorio. Escolha os
 | Frontend/UI/Design System | `agents/design/frontend-design-system.md` |
 | Backend API Design/Contratos | `agents/design/backend-design-system.md` |
 | Branding/Logo/Visual | `agents/design/brand-designer.md` |
+| Chamados LeanSaude | Skill `/chamados-leansaude` - abre, fecha, sync Teams, notifica |
 | Mesa Redonda Tecnica | Skill `/mesa-redonda` - debate com 6 especialistas |
+| BMAD → Azure DevOps | Skill `/bmad-devops` - cria Epic, Features, User Stories, Bugs a partir de PRP |
+| Codebase Lifecycle | Skill `/codebase-review` - detecta mudancas, review, incorpora docs, fecha work items |
+| Brainstorm | Skill `/brainstorm` - fase inicial BMAD, refina requisitos |
 
 ### Passo 3: Planejamento de Execucao
 
@@ -140,6 +144,15 @@ Apresente ao usuario:
 | "DAG Airflow falhando" | Airflow + PostgreSQL + Observability | Paralelo |
 | "email corporativo nao chega" | Office365 + SecOps + Networking | Paralelo |
 | "decidir entre Redis vs Memcached" | `/mesa-redonda` (debate com 6 especialistas + PRP) | Mesa Redonda |
+| "chamado #296 atendido" | `/chamados-leansaude` (fecha DevOps + notifica Teams) | Direto |
+| "abrir chamado no devops" | `/chamados-leansaude` (cria Feature) | Direto |
+| "sync chamados do teams" | `/chamados-leansaude sync` (le Teams -> cria no DevOps) | Direto |
+| "criar fila no devops" | `/chamados-leansaude` (cria Feature com descricao) | Direto |
+| "criar backlog do projeto X" | `/bmad-devops` (PRP → Epic + Features + User Stories) | Direto |
+| "materializar PRP no devops" | `/bmad-devops` (cria hierarquia completa) | Direto |
+| "#3588 concluido" | `/codebase-review` (fecha work item + atualiza docs) | Direto |
+| "o que mudou no codigo?" | `/codebase-review status` (divergencias codigo vs docs) | Direto |
+| "atualizar documentacao" | `/codebase-review incorporar` (sync CODE-BASE.md) | Direto |
 
 ## Regras Criticas
 
@@ -152,3 +165,7 @@ Apresente ao usuario:
 6. **SEMPRE consolide** antes de apresentar resultado final
 7. **Consulte infra.md** se a tarefa envolve infraestrutura (se disponivel no projeto)
 8. **Consulte MEMORY.md** para contexto de projetos (se disponivel no diretorio de memoria do projeto)
+9. **Chamados LeanSaude** - Quando a tarefa envolver chamados, DevOps da LeanSaude, ou Teams, delegue SEMPRE ao skill `/chamados-leansaude`. Padroes: "chamado #NNN atendido", "abrir chamado", "fechar chamado", "sync teams", "criar chamado no devops". O script `scripts/chamados/teams_chamados.py` tem os comandos: `sync` (le Teams), `fechar NUM COMENTARIO` (fecha + notifica Teams)
+10. **#NNN concluido** - Quando o usuario digitar "#NNN concluido" (onde NNN e um ID de work item do Azure DevOps), delegue ao skill `/codebase-review`. Ele fecha o work item e atualiza CODE-BASE.md e CLAUDE.md automaticamente.
+11. **BMAD → Azure DevOps** - Quando o usuario quiser materializar um PRP/plano em work items no Azure DevOps (epic, features, user stories, bugs), delegue ao skill `/bmad-devops`. Padroes: "criar backlog", "materializar PRP", "criar epico e features", "montar board".
+12. **Codebase Review** - Quando o usuario perguntar "o que mudou?", "codigo vs documentacao", "atualizar code-base", delegue ao skill `/codebase-review`.
