@@ -1,0 +1,94 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true
+  },
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "description": "Documentacao atualizada de libs/frameworks - consulta docs em tempo real"
+    },
+    "serena": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/serena-mcp@latest"],
+      "description": "Analise semantica de codigo - classes, funcoes, dependencias entre modulos"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Raciocinio estruturado para analises complexas passo-a-passo"
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "${POSTGRES_CONNECTION_STRING}"
+      },
+      "description": "Analise de schema, queries e indices PostgreSQL (usar replica read-only)"
+    },
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "env": {
+        "MYSQL_HOST": "${MYSQL_HOST:-localhost}",
+        "MYSQL_PORT": "${MYSQL_PORT:-3306}",
+        "MYSQL_USER": "${MYSQL_USER}",
+        "MYSQL_PASSWORD": "${MYSQL_PASSWORD}",
+        "MYSQL_DATABASE": "${MYSQL_DATABASE}"
+      },
+      "description": "Analise de schema e queries MySQL (usar replica read-only)"
+    },
+    "sqlserver": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-mssql"],
+      "env": {
+        "MSSQL_CONNECTION_STRING": "${MSSQL_CONNECTION_STRING}"
+      },
+      "description": "Analise de schema e queries SQL Server (usar replica read-only)"
+    },
+    "docker": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-docker"],
+      "description": "Gerenciar e analisar containers, imagens, Dockerfiles"
+    },
+    "kubernetes": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-kubernetes"],
+      "description": "Analisar clusters, pods, services, deployments K8s"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "Acessar repos, PRs, issues, blame, historico no GitHub"
+    },
+    "azure-devops": {
+      "command": "node",
+      "args": ["/Users/diegomoraes/repos-trabalhos/comunidade/repos-2025/GH/mcp-azure-devop/dist/index.js"],
+      "env": {
+        "AZURE_DEVOPS_ORG_URL": "${AZURE_DEVOPS_ORG_URL}",
+        "AZURE_DEVOPS_PAT": "${AZURE_DEVOPS_PAT}",
+        "AZURE_DEVOPS_PROJECT": "${AZURE_DEVOPS_PROJECT}"
+      },
+      "description": "Azure DevOps completo - 14 tools: repos, commits, PRs, work items, branches, pipelines, stats, search"
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      },
+      "description": "Pesquisa web para CVEs, breaking changes, docs, best practices"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${PROJECT_ROOT:-.}"],
+      "description": "Acesso ao sistema de arquivos do projeto"
+    }
+  }
+}

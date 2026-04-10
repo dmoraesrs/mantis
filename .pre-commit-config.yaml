@@ -1,0 +1,83 @@
+repos:
+  # Detecta secrets e credenciais antes do commit
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: 'package-lock\.json|\.git/|\.gitleaks\.toml|scripts/|\.github/'
+
+  # Hooks nativos para prevencao de vazamentos
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Impede commit de chaves privadas
+      - id: detect-private-key
+
+      # Impede arquivos grandes (binarios acidentais)
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+
+      # Verifica YAML/JSON validos
+      - id: check-yaml
+        args: ['--allow-multiple-documents']
+      - id: check-json
+
+      # Remove whitespace no final das linhas
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+
+      # Garante newline no final do arquivo
+      - id: end-of-file-fixer
+
+      # Impede commit direto na main
+      - id: no-commit-to-branch
+        args: ['--branch', 'main']
+
+      # Detecta conflitos de merge nao resolvidos
+      - id: check-merge-conflict
+
+      # Impede symlinks quebrados
+      - id: check-symlinks
+
+      # Detecta arquivos que nao deveriam ser commitados
+      - id: check-case-conflict
+
+  # Gitleaks - scanner robusto de secrets
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  # Bloqueia arquivos sensiveis por nome/extensao
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: forbid-new-submodules
+
+  # Hooks locais customizados para seguranca
+  - repo: local
+    hooks:
+      - id: block-sensitive-files
+        name: Bloqueia arquivos sensiveis (.env, .pem, .key, etc.)
+        entry: scripts/block-sensitive-files.sh
+        language: script
+        types: [file]
+
+      - id: block-pii-patterns
+        name: Detecta dados pessoais (CPF/CNPJ reais)
+        entry: scripts/block-pii.sh
+        language: script
+        types: [text]
+
+      - id: block-real-passwords
+        name: Detecta senhas hardcoded suspeitas
+        entry: scripts/block-passwords.sh
+        language: script
+        types: [text]
+
+      - id: block-aws-credentials
+        name: Detecta credenciais AWS (Access Key, Secret Key, ARN, Account ID)
+        entry: scripts/block-aws-credentials.sh
+        language: script
+        types: [text]

@@ -1,0 +1,309 @@
+# Configuracao customizada do Gitleaks
+# Regras adicionais para detectar dados sensiveis no contexto brasileiro
+
+title = "Configuracao Gitleaks - Projeto Agentes"
+
+[extend]
+useDefault = true
+
+# --- Regras customizadas ---
+
+[[rules]]
+id = "cpf-brasileiro"
+description = "CPF brasileiro no formato XXX.XXX.XXX-XX"
+regex = '''\b\d{3}\.\d{3}\.\d{3}-\d{2}\b'''
+keywords = ["cpf"]
+tags = ["pii", "brasil"]
+
+  [rules.allowlist]
+  regexes = [
+    # CPFs ficticios conhecidos usados em documentacao
+    '''123\.456\.789-0[0-9]''',
+    '''000\.000\.000-00''',
+    '''111\.111\.111-11''',
+    '''222\.222\.222-22''',
+    '''333\.333\.333-33''',
+    '''444\.444\.444-44''',
+    '''555\.555\.555-55''',
+    '''666\.666\.666-66''',
+    '''777\.777\.777-77''',
+    '''888\.888\.888-88''',
+    '''999\.999\.999-99''',
+  ]
+
+[[rules]]
+id = "cnpj-brasileiro"
+description = "CNPJ brasileiro no formato XX.XXX.XXX/XXXX-XX"
+regex = '''\b\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}\b'''
+keywords = ["cnpj"]
+tags = ["pii", "brasil"]
+
+  [rules.allowlist]
+  regexes = [
+    # CNPJs ficticios conhecidos
+    '''00\.000\.000/0000-00''',
+    '''11\.111\.111/1111-11''',
+    '''12\.345\.678/0001-00''',
+  ]
+
+[[rules]]
+id = "telefone-brasileiro"
+description = "Telefone brasileiro com DDD no formato (XX) XXXXX-XXXX ou (XX) XXXX-XXXX"
+regex = '''\(\d{2}\)\s?\d{4,5}-\d{4}'''
+keywords = ["telefone", "tel", "celular", "fone"]
+tags = ["pii", "brasil"]
+
+  [rules.allowlist]
+  regexes = [
+    # Telefones ficticios para documentacao
+    '''\(11\)\s?91234-5678''',
+    '''\(11\)\s?1234-5678''',
+    '''\(00\)\s?0000-0000''',
+  ]
+
+[[rules]]
+id = "chave-pix"
+description = "Possivel chave PIX no formato de UUID"
+regex = '''[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'''
+keywords = ["pix", "chave"]
+tags = ["financeiro", "brasil"]
+
+[[rules]]
+id = "connection-string-banco"
+description = "Connection string de banco de dados com senha"
+regex = '''(?i)(Server|Data Source|Host)=[^;]+;.*(Password|Pwd)=[^;{}<>]+'''
+keywords = ["server", "password", "pwd", "data source", "connection"]
+tags = ["credencial", "banco"]
+
+  [rules.allowlist]
+  regexes = [
+    # Placeholders permitidos
+    '''<ALTERAR_SENHA>''',
+    '''<SENHA>''',
+    '''<PASSWORD>''',
+  ]
+
+[[rules]]
+id = "azure-tenant-id"
+description = "Azure Tenant ID (GUID) em contexto de configuracao Azure"
+regex = '''(?i)(tenant[_-]?id|tenantid)\s*[:=]\s*["\']?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}["\']?'''
+keywords = ["tenant"]
+tags = ["azure", "credencial"]
+
+  [rules.allowlist]
+  regexes = [
+    '''<SEU_TENANT_ID>''',
+  ]
+
+[[rules]]
+id = "azure-subscription-id"
+description = "Azure Subscription ID (GUID) em contexto de configuracao Azure"
+regex = '''(?i)(subscription[_-]?id|subscriptionid)\s*[:=]\s*["\']?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}["\']?'''
+keywords = ["subscription"]
+tags = ["azure", "credencial"]
+
+  [rules.allowlist]
+  regexes = [
+    '''<SUA_SUBSCRIPTION_ID>''',
+  ]
+
+[[rules]]
+id = "azure-devops-pat"
+description = "Personal Access Token do Azure DevOps"
+regex = '''(?i)[a-z2-7]{52}'''
+keywords = ["pat", "token", "azuredevops", "azure devops"]
+tags = ["azure", "credencial", "token"]
+
+[[rules]]
+id = "connection-string-mongodb"
+description = "Connection string do MongoDB com credenciais"
+regex = '''mongodb(\+srv)?://[^:]+:[^@{}<>]+@[^/]+'''
+keywords = ["mongodb", "mongo"]
+tags = ["credencial", "banco"]
+
+  [rules.allowlist]
+  regexes = [
+    '''<ALTERAR_SENHA>''',
+    '''<SEU_USUARIO>''',
+  ]
+
+[[rules]]
+id = "connection-string-postgresql"
+description = "Connection string do PostgreSQL com credenciais"
+regex = '''postgres(ql)?://[^:]+:[^@{}<>]+@[^/]+'''
+keywords = ["postgres", "postgresql"]
+tags = ["credencial", "banco"]
+
+  [rules.allowlist]
+  regexes = [
+    '''<ALTERAR_SENHA>''',
+    '''<SEU_USUARIO>''',
+  ]
+
+# --- Regras AWS ---
+
+[[rules]]
+id = "aws-access-key-id"
+description = "AWS Access Key ID"
+regex = '''(?i)(aws_access_key_id|aws_access_key|access_key_id|access_key)\s*[:=]\s*["\']?(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}["\']?'''
+keywords = ["AKIA", "AGPA", "AIDA", "AROA", "AIPA", "ANPA", "ANVA", "ASIA", "A3T", "aws_access_key"]
+tags = ["aws", "credencial"]
+
+  [rules.allowlist]
+  regexes = [
+    '''AKIA1234567890ABCDEF''',
+    '''<SUA_ACCESS_KEY>''',
+    '''<AWS_ACCESS_KEY_ID>''',
+  ]
+
+[[rules]]
+id = "aws-secret-access-key"
+description = "AWS Secret Access Key"
+regex = '''(?i)(aws_secret_access_key|aws_secret_key|secret_access_key|secret_key)\s*[:=]\s*["\']?[A-Za-z0-9/+=]{40}["\']?'''
+keywords = ["aws_secret", "secret_access_key", "secret_key"]
+tags = ["aws", "credencial"]
+
+  [rules.allowlist]
+  regexes = [
+    '''<SUA_SECRET_KEY>''',
+    '''<AWS_SECRET_ACCESS_KEY>''',
+    '''wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY''',
+  ]
+
+[[rules]]
+id = "aws-account-id"
+description = "AWS Account ID em contexto de configuracao"
+regex = '''(?i)(account[_-]?id|aws[_-]?account)\s*[:=]\s*["\']?\d{12}["\']?'''
+keywords = ["account_id", "aws_account"]
+tags = ["aws", "credencial"]
+
+  [rules.allowlist]
+  regexes = [
+    '''123456789012''',
+    '''000000000000''',
+    '''<SUA_ACCOUNT_ID>''',
+    '''<AWS_ACCOUNT_ID>''',
+  ]
+
+[[rules]]
+id = "aws-session-token"
+description = "AWS Session Token"
+regex = '''(?i)(aws_session_token|session_token)\s*[:=]\s*["\']?[A-Za-z0-9/+=]{100,}["\']?'''
+keywords = ["session_token", "aws_session"]
+tags = ["aws", "credencial", "token"]
+
+[[rules]]
+id = "aws-arn-with-account"
+description = "AWS ARN com Account ID real (nao placeholder)"
+regex = '''arn:aws:[a-z0-9-]+:[a-z0-9-]*:\d{12}:'''
+keywords = ["arn:aws"]
+tags = ["aws", "credencial"]
+
+  [rules.allowlist]
+  regexes = [
+    '''123456789012''',
+    '''000000000000''',
+  ]
+
+[[rules]]
+id = "aws-secret-manager-value"
+description = "AWS Secrets Manager referencia com valor inline"
+regex = '''(?i)(secretsmanager|secret_arn|secret_name)\s*[:=]\s*["\']?arn:aws:secretsmanager:[^"'\s]+["\']?'''
+keywords = ["secretsmanager", "secret_arn"]
+tags = ["aws", "credencial"]
+
+  [rules.allowlist]
+  regexes = [
+    '''123456789012''',
+    '''<SUA_SECRET_ARN>''',
+  ]
+
+[[rules]]
+id = "aws-iam-credentials"
+description = "AWS IAM credenciais em policies ou configuracoes"
+regex = '''(?i)(iam[_-]?(user|role|policy|access))\s*[:=]\s*["\']?arn:aws:iam::\d{12}:[^"'\s]+["\']?'''
+keywords = ["iam"]
+tags = ["aws", "credencial"]
+
+  [rules.allowlist]
+  regexes = [
+    '''123456789012''',
+    '''000000000000''',
+  ]
+
+[[rules]]
+id = "aws-mfa-serial"
+description = "AWS MFA device serial number"
+regex = '''arn:aws:iam::\d{12}:mfa/[a-zA-Z0-9._-]+'''
+keywords = ["mfa"]
+tags = ["aws", "credencial"]
+
+  [rules.allowlist]
+  regexes = [
+    '''123456789012''',
+  ]
+
+[[rules]]
+id = "aws-rds-endpoint"
+description = "AWS RDS endpoint real com hostname"
+regex = '''[a-z][a-z0-9-]+\.[a-z0-9]+\.[a-z]{2}-[a-z]+-\d\.rds\.amazonaws\.com'''
+keywords = ["rds.amazonaws.com"]
+tags = ["aws", "infra"]
+
+  [rules.allowlist]
+  regexes = [
+    '''meu-banco''',
+    '''exemplo''',
+    '''<SEU_RDS_ENDPOINT>''',
+  ]
+
+# --- Allowlist global ---
+
+[allowlist]
+description = "Arquivos e padroes que devem ser ignorados na varredura"
+paths = [
+  '''.gitleaks.toml''',
+  '''SECURITY.md''',
+  '''CONTRIBUTING.md''',
+  '''.secrets.baseline''',
+  '''LICENSE''',
+  '''scripts/block-aws-credentials.sh''',
+  '''scripts/block-passwords.sh''',
+  '''scripts/block-pii.sh''',
+  '''scripts/block-sensitive-files.sh''',
+  '''.github/workflows/security-scan.yml''',
+  '''.pre-commit-config.yaml''',
+  '''docs/guia-.*\.md''',
+  '''agents/data-engineering/airflow.md''',
+  '''agents/database/postgresql-dba.md''',
+]
+regexTarget = "match"
+regexes = [
+  # Placeholders e exemplos conhecidos
+  '''<ALTERAR_SENHA[^>]*>''',
+  '''<SEU_[^>]+>''',
+  '''<SUA_[^>]+>''',
+  '''<AWS_[^>]+>''',
+  '''EXAMPLE''',
+  '''example\.com''',
+  '''user:pass''',
+  '''user:password''',
+  '''admin:password''',
+  '''postgres:postgres''',
+  '''test:test''',
+  '''airflow:airflow''',
+  '''admin:pass''',
+  '''admin:realpassword''',
+  '''monitor_user:PASS''',
+  '''user:p@ss''',
+  '''postgres:<ALTERAR''',
+  '''SEU_API_KEY''',
+  '''SEU_TOKEN''',
+  '''ALTERAR''',
+  '''SUBSTITUA''',
+  '''PLACEHOLDER''',
+  '''AKIA1234567890ABCDEF''',
+  '''AKIAIOSFODNN7EXAMPLE''',
+  '''wJalrXUtnFEMI''',
+  '''sk-EXEMPLO_NAO_REAL''',
+]

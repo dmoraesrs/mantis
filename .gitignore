@@ -1,0 +1,102 @@
+# Variaveis de ambiente e secrets
+.env
+.env.*
+.env.local
+.env.production
+*.secret
+*.secrets
+
+# Chaves e certificados
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+
+# Credenciais
+credentials.*
+service-account*.json
+.htpasswd
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+env/
+.tox/
+.nox/
+
+# Testing
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.mypy_cache/
+junit.xml
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Terraform
+terraform.tfstate
+terraform.tfstate.*
+terraform.tfvars
+*.tfvars
+.terraform/
+.terraform.lock.hcl
+
+# Kubernetes
+kubeconfig
+.kube/
+
+# Package managers com tokens
+.npmrc
+.pypirc
+
+# Bancos locais
+*.sqlite
+*.sqlite3
+*.db
+
+# Logs
+*.log
+logs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Ruff / Linters
+.ruff_cache/
+
+# Secrets baseline
+.secrets.baseline
+
+# Task (descricoes internas de tarefas)
+task/
