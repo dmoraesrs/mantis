@@ -1,0 +1,3 @@
+[submodule ".agentes-repo"]
+	path = .agentes-repo
+	url = git@github.com:dmoraesrs/agentes.git
